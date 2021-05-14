@@ -27,4 +27,25 @@ End Function
 '-----------------------------------------------------------------------------
 
 
+' https://qiita.com/nna1016/questions/beef01479dca171b1ab5
+Sub sample()
+  Dim d, a, k, i
+  Set d = CreateObject("Scripting.Dictionary")
+  a = Split(ActiveCell.Value, vbLf)
+  k = a(0)
+  d(k) = 0
+  For i = 1 To UBound(a)
+    If a(i) - a(i - 1) = 1 Then
+      d(k) = d(k) + 1
+    Else
+      k = a(i)
+      d(k) = 0
+    End If
+  Next
+  For Each k In d
+    d(k) = IIf(d(k) = 0, k, k & "-" & k + d(k))
+  Next
+  ActiveCell.Offset(, 1).Value = Join(d.Items, vbLf)
+End Sub
+'-----------------------------------------------------------------------------
 
