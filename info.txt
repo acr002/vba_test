@@ -1,0 +1,22 @@
+# flow
+  git add [ファイル名]                //追加
+  git commit -a -m "任意のコメント"   //コミット (-aオプションは変更を自動検出してくれる)
+  git push origin master              //masterを更新
+
+git@github.com:acr002/vba_test.git
+https://github.com/acr002/vba_test.git
+
+
+# ブランチの確認
+H:\A\vba\_github>git branch
+
+# ブランチの作成
+H:\A\vba\_github>git branch sub1
+
+# ブランチの移動
+H:\A\vba\_github>git checkout sub1
+
+# masterにしてsub1をマージして、pushします。
+H:\A\vba\_github>git checkout master
+H:\A\vba\_github>git merge sub1
+H:\A\vba\_github>git push origin master
