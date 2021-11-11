@@ -1,8 +1,34 @@
 ## ファイル名の取得
-VBAでファイル名を取得する方法はいくつかありますが、もっともよく使うものを備忘録として記述します。
+VBAでファイル名を取得する方法はいくつかありますが、私がもっともよく使うものを備忘録として記述します。
 
+下記の関数にフォルダを指定して呼び出します。
+フルパスが入ったCollectionを返します。
 
-## 関数について
+```VB
+Private Function filenames_sub(ByVal a_path As String) As Collection
+  Dim fso      As Object
+  Dim r_cc     As Collection
+  Dim cc       As Collection
+  Dim ii       As Variant
+  Dim b_file   As Object
+  Dim b_folder As Object
+  Set fso = CreateObject("Scripting.FileSystemObject")
+  Set cc = New Collection
+  For Each b_file In fso.getfolder(a_path).Files
+    cc.Add b_file.path
+  Next b_file
+  For Each b_folder In fso.getfolder(a_path).subfolders
+    Set r_cc = filenames_sub(b_folder.path)
+    For Each ii In r_cc
+      cc.Add ii
+    Next ii
+  Next b_folder
+  Set fso = Nothing
+  Set filenames_sub = cc
+End Function
+```
+
+## この関数について
 プライベートな関数としています。
 最初はクラスにしていたのですが、移植等が面倒なので関数にしました。
 
@@ -18,34 +44,37 @@ Collectionを使用したことのない方は身構えてしまうかもしれませんが、中身は文字列で
 ## 呼び出し元
 関数は呼び出して使用しますので、呼び出し元が必要です。
 また、この関数の引数は対象のフォルダです。「どのフォルダを調べるか」を指定するということです。
-フォルダの指定方法について、いくつかサンプルを作りました。
+フォルダの指定方法について、２つサンプルを作りました。
 
 ### 対象フォルダをコード内で指定する方法
-このマクロ入りのエクセルが置いてあるフォルダに「in」というフォルダがあると仮定しています。
-「in」フォルダがないとエラーになります。
+このマクロ入りのエクセルが置いてあるフォルダに「in」というフォルダがあると仮定します。
+(「in」フォルダがないとエラーになります。)
+エクセルが置いてあるところは`ThisWorkbook.path`で取得します。
+その取得したパスに`\in\`を追加して完成です。
+(inのところを自由に変えて使用してください)
 
 私はこの方法を使用しています。
 とりあえず「in」というフォルダを作って、その中にフォルダごとでいいので対象のファイルを入れてしまえばいいからです。
 「in」フォルダというルールが設けられるのであれば使い勝手はいいと思います。
 
 ```VB
-Public Sub sample1()
+Public Sub sample1_on_code()
   Dim fns  As Collection
   Dim path As String
-  path = ThisWorkbook.path & "\in\"     'inフォルダを指定
-  Set fns = get_filenames_sub(path)     '関数を呼び出してfnsに結果を入れます
+  path = ThisWorkbook.path & "\in\"     '指定するフォルダ
+  Set fns = filenames_sub(path)     '関数を呼び出してfnsに結果を入れます
 End Sub
 '-----------------------------------------------------------------------------
 ```
 
 ### ダイアログを使う
-マクロを実行する人が誰かわからない場合や、どんな状況で使用されるかわからない場合は
-ダイアログを使ってあげた方がいいと思います。
-マクロを実行すると、マクロ入りエクセルがいるフォルダを基準にしてダイアログが開きます。
-フォルダを指定してもらえば、関数に指定のフォルダを渡します。
+マクロを実行する人が誰かわからない場合や、どんな状況で使用されるかわからない場合のためのダイアログを使う方法です。
+マクロを実行すると、エクセルがあるフォルダを基準にしてダイアログが開きます。
+フォルダを指定してもらえば、関数に指定されたフォルダを渡します。
+フォルダが指定されなかったら基準のフォルダを関数に渡します。
 
 ```VB
-Public Sub main_filenames_dialog()
+Public Sub sample2_dialog()
   Dim path_this As String
   Dim path      As String
   Dim fns       As Collection
@@ -60,7 +89,7 @@ Public Sub main_filenames_dialog()
       path = path_this
     End If
   End With
-  Set fns = get_filenames_sub(path)
+  Set fns = filenames_sub(path)
 End Sub
 ```
 
